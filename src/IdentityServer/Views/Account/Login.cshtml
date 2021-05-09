@@ -9,7 +9,6 @@
     <partial name="_ValidationSummary" />
 
     <div class="row">
-
         @if (Model.EnableLocalLogin)
         {
             <div class="col-sm-6">
@@ -43,6 +42,16 @@
                             }
                             <button class="btn btn-primary" name="button" value="login">Login</button>
                             <button class="btn btn-secondary" name="button" value="cancel">Cancel</button>
+                        </form>
+                        <form>
+                            <li class="xl-linklist--item">
+                                <a class="xl-linklist--link" asp-controller="Account" asp-action="PasswordlessRegistration" asp-route-ReturnUrl="@Model.ReturnUrl">Register Passwordless</a>
+                            </li>
+                        </form>
+                        <form>
+                            <li class="xl-linklist--item">
+                                <a class="xl-linklist--link" asp-controller="Account" asp-action="PasswordlessLogin" asp-route-ReturnUrl="@Model.ReturnUrl">Sign in Passwordless</a>
+                            </li>
                         </form>
                     </div>
                 </div>

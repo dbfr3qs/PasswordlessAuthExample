@@ -172,7 +172,16 @@ namespace IdentityServerHost.Quickstart.UI
             var vm = await BuildLoginViewModelAsync(model);
             return View(vm);
         }
+        
+        public async Task<IActionResult> PasswordlessLogin(string returnUrl)
+        {
+            return View();
+        }
 
+        public async Task<IActionResult> PasswordlessRegistration(string returnUrl)
+        {
+            return View();
+        }
         
         /// <summary>
         /// Show logout page

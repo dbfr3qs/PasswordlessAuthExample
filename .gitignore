@@ -1,5 +1,5 @@
 .idea
-./src/IdentityServer/bin/*
-./src/IdentityServer/obj/*
-./src/MvcClient/bin/*
-./src/MvcClient/obj/*
+src/IdentityServer/bin/
+src/IdentityServer/obj/
+src/MvcClient/bin/
+src/MvcClient/obj/
