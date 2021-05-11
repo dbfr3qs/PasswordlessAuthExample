@@ -8,6 +8,7 @@
     <PackageReference Include="Fido2" Version="2.0.1" />
     <PackageReference Include="Fido2.AspNet" Version="2.0.1" />
     <PackageReference Include="IdentityServer4" Version="4.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.14" />
 
     <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
   </ItemGroup>

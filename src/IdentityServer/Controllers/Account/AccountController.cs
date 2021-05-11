@@ -173,12 +173,12 @@ namespace IdentityServerHost.Quickstart.UI
             return View(vm);
         }
         
-        public async Task<IActionResult> PasswordlessLogin(string returnUrl)
+        public IActionResult PasswordlessLogin(string returnUrl)
         {
             return View();
         }
 
-        public async Task<IActionResult> PasswordlessRegistration(string returnUrl)
+        public IActionResult PasswordlessRegistration(string returnUrl)
         {
             return View();
         }

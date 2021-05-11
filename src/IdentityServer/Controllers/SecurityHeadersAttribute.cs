@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using System;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -9,6 +11,7 @@ namespace IdentityServerHost.Quickstart.UI
 {
     public class SecurityHeadersAttribute : ActionFilterAttribute
     {
+        static readonly RandomNumberGenerator RandomNumberGenerator = RandomNumberGenerator.Create();
         public override void OnResultExecuting(ResultExecutingContext context)
         {
             var result = context.Result;
@@ -26,8 +29,10 @@ namespace IdentityServerHost.Quickstart.UI
                     context.HttpContext.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
                 }
 
+                var nonce = CreateNonce();
+                var unsafeInLine = "'unsafe-inline'";
                 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
-                var csp = "default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';";
+                var csp = $"default-src 'self' https://cdn.jsdelivr.net/npm/sweetalert2 {unsafeInLine}; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/sweetalert2 'nonce-{nonce}' {unsafeInLine}; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';";
                 // also consider adding upgrade-insecure-requests once you have HTTPS in place for production
                 //csp += "upgrade-insecure-requests;";
                 // also an example if you need client images to be displayed from twitter
@@ -51,6 +56,12 @@ namespace IdentityServerHost.Quickstart.UI
                     context.HttpContext.Response.Headers.Add("Referrer-Policy", referrer_policy);
                 }
             }
+        }
+        
+        static string CreateNonce() {
+            var salt = new byte[128 / 8];
+            RandomNumberGenerator.GetBytes(salt);
+            return Convert.ToBase64String(salt);
         }
     }
 }

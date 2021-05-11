@@ -8,6 +8,7 @@ using Fido2NetLib.Development;
 using Fido2NetLib.Objects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace IdentityServerHost.Quickstart.UI
 {
@@ -29,7 +30,7 @@ namespace IdentityServerHost.Quickstart.UI
 
         [HttpPost]
         [Route("/makeCredentialOptions")]
-        public JsonResult MakeCredentialOptions([FromForm] string username,
+        public ActionResult MakeCredentialOptions([FromForm] string username,
                                                 [FromForm] string displayName,
                                                 [FromForm] string attType,
                                                 [FromForm] string authType,
