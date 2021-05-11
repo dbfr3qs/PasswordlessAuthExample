@@ -175,12 +175,12 @@ namespace IdentityServerHost.Quickstart.UI
         
         public IActionResult PasswordlessLogin(string returnUrl)
         {
-            return View();
+            return View(new LoginViewModel() { ReturnUrl = returnUrl });
         }
 
         public IActionResult PasswordlessRegistration(string returnUrl)
         {
-            return View();
+            return View(new LoginViewModel() { ReturnUrl = returnUrl });
         }
         
         /// <summary>
