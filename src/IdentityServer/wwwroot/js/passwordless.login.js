@@ -130,6 +130,14 @@ async function verifyAssertionWithServer(assertedCredential) {
         timer: 2000
     });
 
-    // redirect to dashboard to show keys
-    window.location.href = "/";
+    // redirect to returnUrl else root
+    const queryParams = window.location.search;
+    const urlParams = new URLSearchParams(queryParams);
+    const returnUrl = urlParams.get('ReturnUrl');
+    if (returnUrl != null) {
+        window.location.href = returnUrl;
+    }
+    else {
+        window.location.href = "/";
+    }
 }

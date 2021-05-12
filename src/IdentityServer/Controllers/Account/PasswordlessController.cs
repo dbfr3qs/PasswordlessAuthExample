@@ -6,21 +6,29 @@ using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Development;
 using Fido2NetLib.Objects;
+using IdentityServer4;
+using IdentityServer4.Events;
+using IdentityServer4.Services;
+using IdentityServer4.Test;
+using IdentityServerHost.Quickstart.UI;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
-namespace IdentityServerHost.Quickstart.UI
+namespace IdentityServer.Controllers.Account
 {
     public class PasswordlessController : Controller
     {
         private IFido2 _fido2;
-        public static IMetadataService _mds;
-        public static readonly DevelopmentInMemoryStore DemoStorage = new DevelopmentInMemoryStore();
-
-        public PasswordlessController(IFido2 fido2)
+        public static readonly DevelopmentInMemoryStore PasswordlessStore = new DevelopmentInMemoryStore();
+        private readonly TestUserStore _users;
+        private readonly IEventService _events;
+        
+        public PasswordlessController(IFido2 fido2, TestUserStore users, IEventService events, IIdentityServerInteractionService interaction)
         {
             _fido2 = fido2;
+            _events = events;
+            _users = users ?? new TestUserStore(TestUsers.Users);;
         }
 
         private string FormatException(Exception e)
@@ -30,7 +38,7 @@ namespace IdentityServerHost.Quickstart.UI
 
         [HttpPost]
         [Route("/makeCredentialOptions")]
-        public ActionResult MakeCredentialOptions([FromForm] string username,
+        public JsonResult MakeCredentialOptions([FromForm] string username,
                                                 [FromForm] string displayName,
                                                 [FromForm] string attType,
                                                 [FromForm] string authType,
@@ -39,6 +47,11 @@ namespace IdentityServerHost.Quickstart.UI
         {
             try
             {
+                // user must already exist in Identity
+                var identityUser = _users.FindByUsername(username);
+                if (identityUser == null) {
+                    throw new Exception("User not found");
+                }
 
                 if (string.IsNullOrEmpty(username))
                 {
@@ -46,7 +59,7 @@ namespace IdentityServerHost.Quickstart.UI
                 }
 
                 // 1. Get user from DB by username (in our example, auto create missing users)
-                var user = DemoStorage.GetOrAddUser(username, () => new Fido2User
+                var user = PasswordlessStore.GetOrAddUser(username, () => new Fido2User
                 {
                     DisplayName = displayName,
                     Name = username,
@@ -54,7 +67,7 @@ namespace IdentityServerHost.Quickstart.UI
                 });
 
                 // 2. Get user existing keys by username
-                var existingKeys = DemoStorage.GetCredentialsByUser(user).Select(c => c.Descriptor).ToList();
+                var existingKeys = PasswordlessStore.GetCredentialsByUser(user).Select(c => c.Descriptor).ToList();
 
                 // 3. Create options
                 var authenticatorSelection = new AuthenticatorSelection
@@ -106,7 +119,7 @@ namespace IdentityServerHost.Quickstart.UI
                 // 2. Create callback so that lib can verify credential id is unique to this user
                 IsCredentialIdUniqueToUserAsyncDelegate callback = async (IsCredentialIdUniqueToUserParams args) =>
                 {
-                    var users = await DemoStorage.GetUsersByCredentialIdAsync(args.CredentialId);
+                    var users = await PasswordlessStore.GetUsersByCredentialIdAsync(args.CredentialId);
                     if (users.Count > 0)
                         return false;
 
@@ -117,7 +130,7 @@ namespace IdentityServerHost.Quickstart.UI
                 var success = await _fido2.MakeNewCredentialAsync(attestationResponse, options, callback);
 
                 // 3. Store the credentials in db
-                DemoStorage.AddCredentialToUser(options.User, new StoredCredential
+                PasswordlessStore.AddCredentialToUser(options.User, new StoredCredential
                 {
                     Descriptor = new PublicKeyCredentialDescriptor(success.Result.CredentialId),
                     PublicKey = success.Result.PublicKey,
@@ -148,12 +161,12 @@ namespace IdentityServerHost.Quickstart.UI
                 if (!string.IsNullOrEmpty(username))
                 {
                     // 1. Get user from DB
-                    var user = DemoStorage.GetUser(username);
+                    var user = PasswordlessStore.GetUser(username);
                     if (user == null)
                         throw new ArgumentException("Username was not registered");
 
                     // 2. Get registered credentials from database
-                    existingCredentials = DemoStorage.GetCredentialsByUser(user).Select(c => c.Descriptor).ToList();
+                    existingCredentials = PasswordlessStore.GetCredentialsByUser(user).Select(c => c.Descriptor).ToList();
                 }
 
                 var exts = new AuthenticationExtensionsClientInputs()
@@ -201,7 +214,7 @@ namespace IdentityServerHost.Quickstart.UI
                 var options = AssertionOptions.FromJson(jsonOptions);
 
                 // 2. Get registered credential from database
-                var creds = DemoStorage.GetCredentialById(clientResponse.Id);
+                var creds = PasswordlessStore.GetCredentialById(clientResponse.Id);
 
                 if (creds == null)
                 {
@@ -214,7 +227,7 @@ namespace IdentityServerHost.Quickstart.UI
                 // 4. Create callback to check if userhandle owns the credentialId
                 IsUserHandleOwnerOfCredentialIdAsync callback = async (args) =>
                 {
-                    var storedCreds = await DemoStorage.GetCredentialsByUserHandleAsync(args.UserHandle);
+                    var storedCreds = await PasswordlessStore.GetCredentialsByUserHandleAsync(args.UserHandle);
                     return storedCreds.Exists(c => c.Descriptor.Id.SequenceEqual(args.CredentialId));
                 };
 
@@ -223,8 +236,13 @@ namespace IdentityServerHost.Quickstart.UI
                     callback);
 
                 // 6. Store the updated counter
-                DemoStorage.UpdateCounter(res.CredentialId, res.Counter);
+                PasswordlessStore.UpdateCounter(res.CredentialId, res.Counter);
 
+                if (res.Status == "ok")
+                {
+                    var username = System.Text.Encoding.UTF8.GetString(creds.UserId);
+                    await SignInOidc(username);
+                }
                 // 7. return OK to client
                 return Json(res);
             }
@@ -232,6 +250,21 @@ namespace IdentityServerHost.Quickstart.UI
             {
                 return Json(new AssertionVerificationResult {Status = "error", ErrorMessage = FormatException(e)});
             }
+        }
+
+        async Task SignInOidc(string username)
+        {
+            var user = _users.FindByUsername(username);
+            await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
+
+            AuthenticationProperties props = new AuthenticationProperties();
+            // issue authentication cookie with subject ID and username
+            var isuser = new IdentityServerUser(user.SubjectId)
+            {
+                DisplayName = user.Username
+            };
+
+            await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser, props);
         }
     }
 }
