@@ -1,4 +1,5 @@
 @using IdentityServer4.Extensions
+@model LoginViewModel
 
 @{
     string name = null;
@@ -16,6 +17,11 @@
             IdentityServer4
         </a>
 
+        <form>
+            <li class="xl-linklist--item">
+                <a class="xl-linklist--link" asp-controller="Account" asp-action="PasswordlessRegistration">Register Passwordless</a>
+            </li>
+        </form>
         @if (!string.IsNullOrWhiteSpace(name))
         {
             <ul class="navbar-nav mr-auto">

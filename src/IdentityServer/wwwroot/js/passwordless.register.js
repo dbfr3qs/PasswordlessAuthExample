@@ -156,8 +156,8 @@ async function registerNewCredential(newCredential) {
         timer: 2000
     });
 
-    // redirect to dashboard?
-    //window.location.href = "/dashboard/" + state.user.displayName;
+    // redirect to root
+    window.location.href = "/"
 }
 
 async function registerCredentialWithServer(formData) {
