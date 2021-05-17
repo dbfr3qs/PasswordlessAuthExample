@@ -3,8 +3,8 @@
 async function handleRegisterSubmit(event) {
     event.preventDefault();
 
-    let username = this.username.value;
-    let displayName = this.username.value;
+    let username = this.username.placeholder;
+    let displayName = username;
 
     // possible values: none, direct, indirect
     let attestation_type = "none";
