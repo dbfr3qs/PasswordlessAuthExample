@@ -8,10 +8,12 @@ using Fido2NetLib.Development;
 using Fido2NetLib.Objects;
 using IdentityServer4;
 using IdentityServer4.Events;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Test;
 using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +54,11 @@ namespace IdentityServer.Controllers.Account
                 if (identityUser == null) {
                     throw new Exception("User not found");
                 }
+
+                if (!HttpContext.User.IsAuthenticated())
+                {
+                    throw new Exception("User is not authenticated");
+                };
 
                 // 1. Get user from DB by username (in our example, auto create missing users)
                 var user = PasswordlessStore.GetOrAddUser(username, () => new Fido2User
