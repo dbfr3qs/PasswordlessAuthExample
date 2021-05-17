@@ -1,5 +1,4 @@
 @using IdentityServer4.Extensions
-@model LoginViewModel
 
 @{
     string name = null;
@@ -17,11 +16,7 @@
             IdentityServer4
         </a>
 
-        <form>
-            <li class="xl-linklist--item">
-                <a class="xl-linklist--link" asp-controller="Account" asp-action="PasswordlessRegistration">Register Passwordless</a>
-            </li>
-        </form>
+
         @if (!string.IsNullOrWhiteSpace(name))
         {
             <ul class="navbar-nav mr-auto">
@@ -31,7 +26,12 @@
                     <div class="dropdown-menu">
                         <a class="dropdown-item" asp-action="Logout" asp-controller="Account">Logout</a>
                     </div>
-              </li>
+                </li>
+                <li class="xl-linklist--item">
+                    <div>
+                        <a class="nav-link" asp-controller="Account" asp-action="PasswordlessRegistration">Register Passwordless</a>
+                    </div>
+                </li>
             </ul>
         }
     

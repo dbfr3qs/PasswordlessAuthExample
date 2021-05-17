@@ -53,11 +53,6 @@ namespace IdentityServer.Controllers.Account
                     throw new Exception("User not found");
                 }
 
-                if (string.IsNullOrEmpty(username))
-                {
-                    username = $"{displayName} (Usernameless user created at {DateTime.UtcNow})";
-                }
-
                 // 1. Get user from DB by username (in our example, auto create missing users)
                 var user = PasswordlessStore.GetOrAddUser(username, () => new Fido2User
                 {

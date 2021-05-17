@@ -80,6 +80,11 @@ namespace IdentityServerHost.Quickstart.UI
             // check if we are in the context of an authorization request
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
+            if (button == "passwordless")
+            {
+                return View("PasswordlessLogin", new LoginViewModel() { ReturnUrl = model.ReturnUrl });
+            }
+
             // the user clicked the "cancel" button
             if (button != "login")
             {
