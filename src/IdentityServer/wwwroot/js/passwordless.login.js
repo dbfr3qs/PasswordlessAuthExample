@@ -1,4 +1,4 @@
-﻿document.getElementById('signin').addEventListener('submit', handleSignInSubmit);
+﻿document.getElementById('signinpasswordless').addEventListener('submit', handleSignInSubmit);
 
 async function handleSignInSubmit(event) {
     event.preventDefault();
