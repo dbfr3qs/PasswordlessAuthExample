@@ -13,7 +13,6 @@ using IdentityServer4.Services;
 using IdentityServer4.Test;
 using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -261,12 +260,12 @@ namespace IdentityServer.Controllers.Account
 
             AuthenticationProperties props = new AuthenticationProperties();
             // issue authentication cookie with subject ID and username
-            var isuser = new IdentityServerUser(user.SubjectId)
+            var isUser = new IdentityServerUser(user.SubjectId)
             {
                 DisplayName = user.Username
             };
 
-            await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser, props);
+            await AuthenticationManagerExtensions.SignInAsync(HttpContext, isUser, props);
         }
     }
 }
