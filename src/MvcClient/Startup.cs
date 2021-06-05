@@ -35,14 +35,14 @@ namespace MvcClient
                 .AddCookie("Cookies")
                 .AddOpenIdConnect("oidc", options =>
                 {
-                    options.Authority = "http://localhost:5010";
+                    options.Authority = "https://localhost:5010";
 
                     options.ClientId = "mvc";
                     options.ClientSecret = "secret";
                     options.ResponseType = "code";
 
                     options.SaveTokens = true;
-                    options.RequireHttpsMetadata = false;
+                    options.RequireHttpsMetadata = true;
                 });
         }
 
