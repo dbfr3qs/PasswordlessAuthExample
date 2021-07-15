@@ -7,11 +7,21 @@ Works on Windows 10 with Windows Hello!
 Works on OSX 10.13 with Yubikey5.
 Works on OSX 10.13 with Chrome's WebAuthN virtual environment enabled.
 
+## Running
+
+```
+dotnet restore
+dotnet build
+dotnet run
+```
+
 For much more information please see my medium posts on subject:
 
 [Why we should use Passwordless.](https://medium.com/@christopher.keogh/implementing-passwordless-auth-is-now-stupidly-easy-part-1-e2f5430a1ed3)
 
 [An example Passwordless implementation.](https://medium.com/@christopher.keogh/implementing-passwordless-auth-is-now-stupidly-easy-part-2-e714c932b79b)
+
+## WebAuthN
 
 For info on how WebAuthN works:
 [https://webauthn.guide/](https://webauthn.guide/)
